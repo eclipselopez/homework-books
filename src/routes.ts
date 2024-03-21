@@ -49,4 +49,14 @@ routes.put('/update_book/:id', async(req: Request, res: Response) => {
     }
 })
 
+routes.delete('/delete_book/:id', async(req: Request, res: Response) => {
+    try {
+        const { id } = req.params
+
+        const response = await bookCtrl.deleteBook(String(id))
+        return res.status(response.code).json(response)
+    } catch (err: any) {
+        return res.status(err.code ? err.code : 500).json(err)
+    }})
+
 export default routes

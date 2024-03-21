@@ -36,6 +36,10 @@ export default class BookController {
         try {
             this.connection = this.server.app.locals.dbConnection
 
+            if (isNaN(limit) || isNaN(page) || limit <= 0 || page <= 0) {
+                return { ok: false, message: 'Invalid limit or page', response: null, code: 400 };
+            }
+
             const regex = new RegExp(term ? term : '', 'i')
 
             const response = await Book.find(
@@ -49,8 +53,8 @@ export default class BookController {
             .skip((page - 1) * limit)
             .exec()
 
-            if( response.length < 1 ) {
-                return { ok: false, message: 'Dont exist books with this terms', response: null, code: 404 }
+            if (response.length === 0) {
+                return { ok: false, message: 'No books found with these terms', response: null, code: 404 };
             }
 
             return { ok: true, message: 'Books found!', response: response, code: 200 }
@@ -66,11 +70,15 @@ export default class BookController {
         try{
             this.connection = this.server.app.locals.dbConnection
 
+            if (isNaN(isbn)) {
+                return { ok: false, message: 'Invalid ISBN', response: null, code: 400 };
+            }
+
             const response: any = await Book.findOne({isbn: isbn})
 
-            if( response.length < 1 ) {
-                return { ok: false, message: 'Dont exist books with this terms', response: null, code: 404 }
-            }
+        if (!response) {
+            return { ok: false, message: 'Book not found', response: null, code: 404 };
+        }
 
             return { ok: true, message: 'Found book!', response: response, code: 200 }
         } catch (err: any) {
@@ -85,14 +93,22 @@ export default class BookController {
         try {
             this.connection = this.server.app.locals.dbConnection
 
+            if (!idBook) {
+                return { ok: false, message: 'Invalid book ID', response: null, code: 400 };
+            }
+
+            if (Object.keys(book).length === 0) {
+                return { ok: false, message: 'No fields to update', response: null, code: 400 };
+            }
+
             const response: any = await Book.findByIdAndUpdate(
                 {_id: idBook}, 
                 book, 
                 { returnDocument: 'after' }
             )
 
-            if(!response) {
-                return { ok: false, message: 'Dont exist books with this id', response: null, code: 404 }
+            if (!response) {
+                return { ok: false, message: 'Book not found', response: null, code: 404 };
             }
 
             return { ok: true, message: 'Updated book!', response: response, code: 200 }
@@ -102,5 +118,28 @@ export default class BookController {
         } finally {
             if(this.connection) await this.server.app.locals.dbConnection.release(this.connection)
         }    
+    }
+
+    async deleteBook(idBook: string): Promise<IResponse> {
+        try{
+            this.connection = this.server.app.locals.dbConnection
+
+            if (!idBook) {
+                return { ok: false, message: 'Invalid book ID', response: null, code: 400 };
+            }
+
+            const response = await Book.findByIdAndDelete({_id: idBook})
+
+            if (!response) {
+                return { ok: false, message: 'Book not found', response: null, code: 404 };
+            }
+
+            return { ok: true, message: 'Deleted book!', response: response, code: 200 }
+        } catch (err: any) {
+            logger.error(`[BookController/getBookByIsbn] ${err}`)
+            return { ok: false, message: 'Error ocurred', response: err, code: 500 }
+        } finally {
+            if(this.connection) await this.server.app.locals.dbConnection.release(this.connection)
+        }        
     }
 }
