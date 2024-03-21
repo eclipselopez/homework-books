@@ -1,6 +1,6 @@
 export default interface IBook {
     id?: string,
-    tittle: string,
+    title: string,
     author: string,
     isbn: number,
     gender: string,

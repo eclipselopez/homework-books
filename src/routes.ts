@@ -15,4 +15,26 @@ routes.post('/create_book', async(req: Request, res: Response) => {
     }
 })
 
+routes.get('/find_books', async(req: Request, res: Response) => {
+    try {
+        const {term, limit, page} = req.query
+
+        const response = await bookCtrl.findBooks(String(term), Number(limit), Number(page))
+        return res.status(response.code).json(response)
+    } catch (err: any) {
+        return res.status(err.code ? err.code : 500).json(err)
+    }
+})
+
+routes.get('/get_book_by_isbn/:isbn', async(req: Request, res: Response) => {
+    try {
+        const { isbn } = req.params
+
+        const response = await bookCtrl.getBookByIsbn(Number(isbn))
+        return res.status(response.code).json(response)
+    } catch (err: any) {
+        return res.status(err.code ? err.code : 500).json(err)
+    }
+})
+
 export default routes

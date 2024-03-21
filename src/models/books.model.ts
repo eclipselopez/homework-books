@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose"
 
 const booksSchema: Schema = new Schema ({
     id : { type: String },
-    tittle: { type: String, required: true },
+    title: { type: String, required: true },
     author: { type: String, required: true },
     isbn: { type: Number, required: true, unique: true },
     gender: { type: String, required: true, toLowerCase: true },
