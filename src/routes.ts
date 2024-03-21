@@ -37,4 +37,16 @@ routes.get('/get_book_by_isbn/:isbn', async(req: Request, res: Response) => {
     }
 })
 
+routes.put('/update_book/:id', async(req: Request, res: Response) => {
+    try {
+        const { id } = req.params
+        const { book } = req.body
+
+        const response = await bookCtrl.updateBook(book, String(id))
+        return res.status(response.code).json(response)
+    } catch (err: any) {
+        return res.status(err.code ? err.code : 500).json(err)
+    }
+})
+
 export default routes
